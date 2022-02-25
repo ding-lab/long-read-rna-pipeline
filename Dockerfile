@@ -1,9 +1,11 @@
 # Dockerfile for ENCODE-DCC long read rna seq pipeline
-FROM ubuntu@sha256:db6697a61d5679b7ca69dbde3dad6be0d17064d5b6b0e9f7be8d456ebb337209
-MAINTAINER Otto Jolanki
+FROM ubuntu:18.04
+MAINTAINER Jay Mashl <rmashl@wustl.edu>
 
-RUN apt-get update && apt-get install -y software-properties-common
-RUN add-apt-repository -y ppa:deadsnakes/ppa
+
+RUN apt-get update && apt-get install -y software-properties-common apt-transport-https
+RUN DEBIAN_FRONTEND=noninteractive TZ=America/New_York apt-get -y install tzdata
+RUN add-apt-repository -y ppa:deadsnakes/ppa &&  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 &&  add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
 RUN apt-get update && apt-get install -y \
     python \
     cython \
@@ -21,7 +23,9 @@ RUN apt-get update && apt-get install -y \
     python3.7 \
     python3.7-dev \
     libssl-dev \
-    build-essential
+    build-essential \
+    r-base \
+    r-base-core
 
 RUN mkdir /software
 WORKDIR /software
@@ -39,14 +43,7 @@ ENV PATH "/software/minimap2-2.15_x64-linux/:${PATH}"
 
 # Install R 3.3.2
 
-RUN wget https://cran.r-project.org/bin/linux/ubuntu/xenial/r-base-core_3.3.2-1xenial0_amd64.deb
-RUN yes | gdebi r-base-core_3.3.2-1xenial0_amd64.deb
 
-RUN wget https://cran.r-project.org/bin/linux/ubuntu/xenial/r-recommended_3.3.2-1xenial0_all.deb
-RUN yes | gdebi r-recommended_3.3.2-1xenial0_all.deb
-
-RUN wget https://cran.r-project.org/bin/linux/ubuntu/xenial/r-base_3.3.2-1xenial0_all.deb
-RUN yes | gdebi r-base_3.3.2-1xenial0_all.deb
 
 # clear apt lists
 RUN rm -rf /var/lib/apt/lists/*
